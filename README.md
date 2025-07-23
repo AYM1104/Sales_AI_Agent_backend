@@ -29,3 +29,5 @@
 ├── requirements.txt
 ├── .env
 └── run.py                  # アプリケーション起動用
+
+
