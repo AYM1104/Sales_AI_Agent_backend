@@ -24,7 +24,7 @@ app = FastAPI()
 # CORS設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://sales-ai-agent-frontend.vercel.app"],  # Next.jsのデフォルトポート
+    allow_origins=["*"],  # Next.jsのデフォルトポート
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
