@@ -47,3 +47,16 @@ async def search_company(
             success=False,
             error_message=f"APIサーバーエラー: {str(e)}"
         )
+
+
+@app.get("/debug/env-direct")
+async def env_direct():
+    import os
+    return {
+        "google_api_key_raw": os.environ.get('GOOGLE_API_KEY', 'NOT_FOUND'),
+        "google_api_key_getenv": os.getenv('GOOGLE_API_KEY', 'NOT_FOUND'),
+        "google_api_key_exists": 'GOOGLE_API_KEY' in os.environ,
+        "all_env_keys": list(os.environ.keys()),
+        "port": os.getenv('PORT'),
+        "total_vars": len(os.environ)
+    }
