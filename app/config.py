@@ -18,7 +18,7 @@ class Settings:
     ]
     
     # Google AI設定
-    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY")
     GEMINI_MODEL_NAME: str = "gemini-2.5-pro"
     
     # ファイルパス設定
