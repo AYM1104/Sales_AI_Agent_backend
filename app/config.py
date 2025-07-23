@@ -21,6 +21,13 @@ class Settings:
     # Google AI設定
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY")
     GEMINI_MODEL_NAME: str = "gemini-2.5-pro"
+
+    def _get_required_env_var(self, var_name: str) -> str:
+        """必須環境変数を取得"""
+        value = os.getenv(var_name)
+        if not value:
+            raise ValueError(f"環境変数 {var_name} が設定されていません")
+        return value
     
     # ファイルパス設定
     DATA_DIR: str = "app/data"
