@@ -14,7 +14,7 @@ class Settings:
     # CORS設定
     ALLOWED_ORIGINS: List[str] = [
         "http://localhost:3000",
-        "http://127.0.0.1:3000",
+        "https://sales-ai-agent-frontend-git-main-ak3668134-gmailcoms-projects.vercel.app",
     ]
     
     # Google AI設定
