@@ -49,7 +49,7 @@ async def search_company(
         )
 
 
-@app.get("/debug/env-direct")
+@router.get("/debug/env-direct")
 async def env_direct():
     import os
     return {
