@@ -15,6 +15,7 @@ class Settings:
     ALLOWED_ORIGINS: List[str] = [
         "http://localhost:3000",
         "https://sales-ai-agent-frontend-git-main-ak3668134-gmailcoms-projects.vercel.app",
+        "https://sales-ai-agent-frontend.vercel.app",
     ]
     
     # Google AI設定
