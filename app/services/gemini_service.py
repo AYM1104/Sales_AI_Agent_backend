@@ -41,57 +41,68 @@ class GeminiService:
     async def summarize_securities_report(self, pdf_url: str, company_name: str) -> str:
         """有価証券報告書を要約"""
         try:
-            print(f"=== summarize_securities_report 開始 ===")
-            print(f"PDF URL: {pdf_url}")
+            print("=== プロンプトファイル版テスト開始 ===")
             print(f"企業名: {company_name}")
             
-            # 1. PDFデータをダウンロード
-            print("PDFダウンロード開始...")
-            response = requests.get(pdf_url)
-            response.raise_for_status()
-            print(f"PDFダウンロード成功: {len(response.content)} bytes")
-            
-            # 2. fitz で PDF を読み込む
-            print("PDF読み込み開始...")
-            doc = fitz.open(stream=response.content, filetype="pdf")
-            print(f"PDF読み込み成功: {len(doc)} pages")
-            
-            # 3. テキスト抽出
-            print("テキスト抽出開始...")
-            text = ""
-            for page in doc:
-                text += page.get_text()
-            print(f"テキスト抽出成功: {len(text)} 文字")
-            
-            # 4. プロンプトファイルを読み込む
-            print("プロンプト読み込み開始...")
+            # 1. プロンプトテンプレートを読み込み
+            print("プロンプトテンプレート読み込み...")
             prompt_template = self._load_prompt("prompt.txt")
-            print(f"プロンプトテンプレート読み込み成功: {len(prompt_template)} 文字")
+            print(f"プロンプトテンプレート: {len(prompt_template)} 文字")
             
-            prompt_text = prompt_template.replace("[企業名を入力]", company_name) + "\n" + text[:settings.MAX_PDF_CHARS]
-            print(f"最終プロンプト準備完了: {len(prompt_text)} 文字")
-            print(f"MAX_PDF_CHARS設定: {settings.MAX_PDF_CHARS}")
+            # 2. 企業名を置換
+            prompt_text = prompt_template.replace("[企業名を入力]", company_name)
+            print(f"企業名置換後: {len(prompt_text)} 文字")
             
-            # 5. Gemini APIで要約を取得
+            # 3. ダミーの企業情報を追加（PDF代わり）
+            dummy_company_info = f"""
+    
+    {company_name}の有価証券報告書（サンプル情報）:
+    
+    ■事業概況
+    - 主力事業：IT・ソフトウェア開発
+    - 売上高：前年度100億円（前年比5%増）
+    - 営業利益：10億円（利益率10%）
+    - 従業員数：1,000名
+    
+    ■事業リスク
+    - 人材不足による開発遅延リスク
+    - 技術革新への対応遅れ
+    - サイバーセキュリティリスク
+    
+    ■設備投資
+    - 前年度設備投資額：5億円
+    - IT・システム投資：2億円
+    - 今後3年間でDX推進に10億円投資予定
+    
+    ■組織体制
+    - 事業部制を採用
+    - 製造部門、開発部門、営業部門
+    - 子会社3社（うち海外1社）
+    
+    ■競合環境
+    - 業界内でのシェア：10%（業界5位）
+    - 差別化課題：品質向上、コスト削減
+    - 顧客要求：納期短縮、自動化推進
+            """
+            
+            # 4. 最終的なプロンプトを作成
+            final_prompt = prompt_text + dummy_company_info
+            print(f"最終プロンプト: {len(final_prompt)} 文字")
+            
+            # 5. Gemini APIで分析を実行
             print("Gemini API呼び出し開始...")
-            print(f"使用モデル: {settings.GEMINI_MODEL_NAME}")
-            
-            response = self.model.generate_content(prompt_text)
-            print("Gemini API呼び出し成功")
-            print(f"レスポンス取得: {len(response.text) if response.text else 0} 文字")
+            response = self.model.generate_content(final_prompt)
+            print("Gemini API呼び出し成功!")
+            print(f"レスポンス長: {len(response.text)} 文字")
             
             return response.text
             
-        except requests.RequestException as e:
-            print(f"PDFダウンロードエラー: {e}")
-            raise
         except Exception as e:
-            print(f"summarize_securities_report エラー: {e}")
-            print(f"エラータイプ: {type(e)}")
+            print(f"プロンプトファイル版テストエラー: {e}")
             import traceback
             print(f"スタックトレース: {traceback.format_exc()}")
-            raise
-    
+            return f"エラー: {e}"    
+
     async def generate_hypothesis(
         self, 
         summary: str, 
