@@ -37,76 +37,60 @@ class GeminiService:
         filepath = os.path.join(settings.PROMPTS_DIR, filename)
         with open(filepath, "r", encoding="utf-8") as f:
             return f.read()
-
+   
     async def summarize_securities_report(self, pdf_url: str, company_name: str) -> str:
         """有価証券報告書を要約"""
-        # 複雑な処理を全部スキップして、シンプルなAPIコールのみ
         try:
-            print("=== シンプルテスト開始 ===")
-            simple_prompt = "Hello, how are you?"
-            print(f"シンプルプロンプト: {simple_prompt}")
+            print(f"=== summarize_securities_report 開始 ===")
+            print(f"PDF URL: {pdf_url}")
+            print(f"企業名: {company_name}")
             
-            response = self.model.generate_content(simple_prompt)
-            print("シンプルテスト成功！")
+            # 1. PDFデータをダウンロード
+            print("PDFダウンロード開始...")
+            response = requests.get(pdf_url)
+            response.raise_for_status()
+            print(f"PDFダウンロード成功: {len(response.content)} bytes")
             
-            return f"テスト成功: {response.text}"
+            # 2. fitz で PDF を読み込む
+            print("PDF読み込み開始...")
+            doc = fitz.open(stream=response.content, filetype="pdf")
+            print(f"PDF読み込み成功: {len(doc)} pages")
+            
+            # 3. テキスト抽出
+            print("テキスト抽出開始...")
+            text = ""
+            for page in doc:
+                text += page.get_text()
+            print(f"テキスト抽出成功: {len(text)} 文字")
+            
+            # 4. プロンプトファイルを読み込む
+            print("プロンプト読み込み開始...")
+            prompt_template = self._load_prompt("prompt.txt")
+            print(f"プロンプトテンプレート読み込み成功: {len(prompt_template)} 文字")
+            
+            prompt_text = prompt_template.replace("[企業名を入力]", company_name) + "\n" + text[:settings.MAX_PDF_CHARS]
+            print(f"最終プロンプト準備完了: {len(prompt_text)} 文字")
+            print(f"MAX_PDF_CHARS設定: {settings.MAX_PDF_CHARS}")
+            
+            # 5. Gemini APIで要約を取得
+            print("Gemini API呼び出し開始...")
+            print(f"使用モデル: {settings.GEMINI_MODEL_NAME}")
+            
+            response = self.model.generate_content(prompt_text)
+            print("Gemini API呼び出し成功")
+            print(f"レスポンス取得: {len(response.text) if response.text else 0} 文字")
+            
+            return response.text
+            
+        except requests.RequestException as e:
+            print(f"PDFダウンロードエラー: {e}")
+            raise
         except Exception as e:
-            print(f"シンプルテストでもエラー: {e}")
-            return f"シンプルテストでもエラー: {e}"
-    
-    # async def summarize_securities_report(self, pdf_url: str, company_name: str) -> str:
-    #     """有価証券報告書を要約"""
-    #     try:
-    #         print(f"=== summarize_securities_report 開始 ===")
-    #         print(f"PDF URL: {pdf_url}")
-    #         print(f"企業名: {company_name}")
-            
-    #         # 1. PDFデータをダウンロード
-    #         print("PDFダウンロード開始...")
-    #         response = requests.get(pdf_url)
-    #         response.raise_for_status()
-    #         print(f"PDFダウンロード成功: {len(response.content)} bytes")
-            
-    #         # 2. fitz で PDF を読み込む
-    #         print("PDF読み込み開始...")
-    #         doc = fitz.open(stream=response.content, filetype="pdf")
-    #         print(f"PDF読み込み成功: {len(doc)} pages")
-            
-    #         # 3. テキスト抽出
-    #         print("テキスト抽出開始...")
-    #         text = ""
-    #         for page in doc:
-    #             text += page.get_text()
-    #         print(f"テキスト抽出成功: {len(text)} 文字")
-            
-    #         # 4. プロンプトファイルを読み込む
-    #         print("プロンプト読み込み開始...")
-    #         prompt_template = self._load_prompt("prompt.txt")
-    #         print(f"プロンプトテンプレート読み込み成功: {len(prompt_template)} 文字")
-            
-    #         prompt_text = prompt_template.replace("[企業名を入力]", company_name) + "\n" + text[:settings.MAX_PDF_CHARS]
-    #         print(f"最終プロンプト準備完了: {len(prompt_text)} 文字")
-    #         print(f"MAX_PDF_CHARS設定: {settings.MAX_PDF_CHARS}")
-            
-    #         # 5. Gemini APIで要約を取得
-    #         print("Gemini API呼び出し開始...")
-    #         print(f"使用モデル: {settings.GEMINI_MODEL_NAME}")
-            
-    #         response = self.model.generate_content(prompt_text)
-    #         print("Gemini API呼び出し成功")
-    #         print(f"レスポンス取得: {len(response.text) if response.text else 0} 文字")
-            
-    #         return response.text
-            
-    #     except requests.RequestException as e:
-    #         print(f"PDFダウンロードエラー: {e}")
-    #         raise
-    #     except Exception as e:
-    #         print(f"summarize_securities_report エラー: {e}")
-    #         print(f"エラータイプ: {type(e)}")
-    #         import traceback
-    #         print(f"スタックトレース: {traceback.format_exc()}")
-    #         raise
+            print(f"summarize_securities_report エラー: {e}")
+            print(f"エラータイプ: {type(e)}")
+            import traceback
+            print(f"スタックトレース: {traceback.format_exc()}")
+            raise
     
     async def generate_hypothesis(
         self, 
