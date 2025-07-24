@@ -11,8 +11,26 @@ class GeminiService:
     """Gemini API サービス"""
     
     def __init__(self):
-        genai.configure(api_key=settings.GOOGLE_API_KEY)
-        self.model = GenerativeModel(model_name=settings.GEMINI_MODEL_NAME)
+        print(f"=== GeminiService初期化開始 ===")
+        print(f"GOOGLE_API_KEY存在: {bool(settings.GOOGLE_API_KEY)}")
+        print(f"GEMINI_MODEL_NAME: {settings.GEMINI_MODEL_NAME}")
+        
+        if not settings.GOOGLE_API_KEY:
+            raise ValueError("GOOGLE_API_KEY が設定されていません")
+        
+        try:
+            genai.configure(api_key=settings.GOOGLE_API_KEY)
+            print("genai.configure 成功")
+            
+            self.model = GenerativeModel(model_name=settings.GEMINI_MODEL_NAME)
+            print("GenerativeModel 作成成功")
+            
+        except Exception as e:
+            print(f"GeminiService初期化エラー: {e}")
+            print(f"エラータイプ: {type(e)}")
+            raise
+        
+        print("=== GeminiService初期化完了 ===")
     
     def _load_prompt(self, filename: str) -> str:
         """プロンプトファイルを読み込み"""
