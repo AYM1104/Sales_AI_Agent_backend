@@ -39,70 +39,25 @@ class GeminiService:
             return f.read()
    
     async def summarize_securities_report(self, pdf_url: str, company_name: str) -> str:
-        """有価証券報告書を要約"""
         try:
-            print("=== プロンプトファイル版テスト開始 ===")
-            print(f"企業名: {company_name}")
+            print("=== プロンプトテンプレートのみテスト ===")
             
-            # 1. プロンプトテンプレートを読み込み
-            print("プロンプトテンプレート読み込み...")
+            # 1. プロンプトテンプレートのみ（ダミーデータなし）
             prompt_template = self._load_prompt("prompt.txt")
-            print(f"プロンプトテンプレート: {len(prompt_template)} 文字")
+            prompt_only = prompt_template.replace("[企業名を入力]", company_name)
             
-            # 2. 企業名を置換
-            prompt_text = prompt_template.replace("[企業名を入力]", company_name)
-            print(f"企業名置換後: {len(prompt_text)} 文字")
+            print(f"プロンプトのみ: {len(prompt_only)} 文字")
+            print(f"プロンプト内容（最初の200文字）: {prompt_only[:200]}")
             
-            # 3. ダミーの企業情報を追加（PDF代わり）
-            dummy_company_info = f"""
-    
-    {company_name}の有価証券報告書（サンプル情報）:
-    
-    ■事業概況
-    - 主力事業：IT・ソフトウェア開発
-    - 売上高：前年度100億円（前年比5%増）
-    - 営業利益：10億円（利益率10%）
-    - 従業員数：1,000名
-    
-    ■事業リスク
-    - 人材不足による開発遅延リスク
-    - 技術革新への対応遅れ
-    - サイバーセキュリティリスク
-    
-    ■設備投資
-    - 前年度設備投資額：5億円
-    - IT・システム投資：2億円
-    - 今後3年間でDX推進に10億円投資予定
-    
-    ■組織体制
-    - 事業部制を採用
-    - 製造部門、開発部門、営業部門
-    - 子会社3社（うち海外1社）
-    
-    ■競合環境
-    - 業界内でのシェア：10%（業界5位）
-    - 差別化課題：品質向上、コスト削減
-    - 顧客要求：納期短縮、自動化推進
-            """
-            
-            # 4. 最終的なプロンプトを作成
-            final_prompt = prompt_text + dummy_company_info
-            print(f"最終プロンプト: {len(final_prompt)} 文字")
-            
-            # 5. Gemini APIで分析を実行
-            print("Gemini API呼び出し開始...")
-            response = self.model.generate_content(final_prompt)
-            print("Gemini API呼び出し成功!")
-            print(f"レスポンス長: {len(response.text)} 文字")
+            response = self.model.generate_content(prompt_only)
+            print("プロンプトテンプレートのみで成功！")
             
             return response.text
             
         except Exception as e:
-            print(f"プロンプトファイル版テストエラー: {e}")
-            import traceback
-            print(f"スタックトレース: {traceback.format_exc()}")
-            return f"エラー: {e}"    
-
+            print(f"プロンプトテンプレートのみでエラー: {e}")
+            return f"プロンプトテンプレートのみでエラー: {e}"
+        
     async def generate_hypothesis(
         self, 
         summary: str, 
